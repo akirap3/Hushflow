@@ -1,0 +1,15 @@
+class: WebhookLog
+table: webhook_logs
+fields:
+  messageId: String
+  historyId: String?
+  payload: String
+  status: String
+  error: String?
+  receivedAt: DateTime
+  processedAt: DateTime?
+indexes:
+  webhook_message_idx:
+    fields: messageId
+  webhook_status_idx:
+    fields: status, receivedAt

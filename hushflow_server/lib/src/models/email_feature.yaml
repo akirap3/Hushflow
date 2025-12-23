@@ -1,0 +1,23 @@
+class: EmailFeature
+table: email_features
+fields:
+  emailId: int, relation(parent=emails)
+  userId: int, relation(parent=users)
+  senderFrequency: int
+  senderOpenRate: double
+  keywordVector: String?
+  hasUnsubscribeLink: bool
+  contentLength: int
+  imageCount: int
+  linkCount: int
+  hourReceived: int
+  dayOfWeek: int
+  wasOpened: bool?
+  wasClicked: bool?
+  interactionTime: int?
+indexes:
+  feature_email_idx:
+    fields: emailId
+    unique: true
+  feature_user_idx:
+    fields: userId

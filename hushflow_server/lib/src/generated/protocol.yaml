@@ -1,0 +1,34 @@
+auth:
+  - getAuthUrl:
+  - exchangeCode:
+  - refreshToken:
+  - setupWatch:
+cleanup:
+  - getCandidates:
+  - queueBatchAction:
+  - executeUnsubscribes:
+  - getPendingQueue:
+  - excludeSender:
+  - unexcludeSender:
+  - getExcludedSenders:
+email:
+  - listEmails:
+  - getEmail:
+  - markAsRead:
+  - trackClick:
+  - getStaleEmails:
+  - triggerColdStart:
+example:
+  - hello:
+summary:
+  - listSummaries:
+  - getSummary:
+  - generateSummary:
+  - markAsRead:
+  - getAudioUrl:
+  - setSchedule:
+  - getSchedule:
+voice:
+  - parseIntent:
+  - generateBriefing:
+  - executeAction:

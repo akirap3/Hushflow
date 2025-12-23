@@ -1,0 +1,31 @@
+class: Email
+table: emails
+fields:
+  userId: int, relation(parent=users)
+  gmailId: String
+  threadId: String?
+  sender: String
+  senderEmail: String
+  subject: String
+  snippet: String?
+  bodyPlain: String?
+  bodyHtml: String?
+  receivedAt: DateTime
+  isRead: bool
+  isSubscription: bool
+  priorityScore: double
+  labels: List<String>?
+  category: String?
+  hasImages: bool
+  valuableImageUrl: String?
+  createdAt: DateTime
+indexes:
+  email_gmail_idx:
+    fields: gmailId
+    unique: true
+  email_user_received_idx:
+    fields: userId, receivedAt
+  email_user_unread_idx:
+    fields: userId, isRead
+  email_user_subscription_idx:
+    fields: userId, isSubscription

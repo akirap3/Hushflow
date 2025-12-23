@@ -1,0 +1,14 @@
+class: Exclusion
+table: exclusions
+fields:
+  userId: int, relation(parent=users)
+  type: String
+  value: String
+  reason: String?
+  createdAt: DateTime
+indexes:
+  exclusion_user_type_idx:
+    fields: userId, type
+  exclusion_user_value_idx:
+    fields: userId, type, value
+    unique: true

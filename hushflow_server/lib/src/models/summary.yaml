@@ -1,0 +1,15 @@
+class: Summary
+table: summaries
+fields:
+  userId: int, relation(parent=users)
+  title: String
+  content: String
+  audioUrl: String?
+  emailCount: int
+  generatedAt: DateTime
+  periodStart: DateTime
+  periodEnd: DateTime
+  isRead: bool
+indexes:
+  summary_user_generated_idx:
+    fields: userId, generatedAt

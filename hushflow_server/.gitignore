@@ -1,0 +1,20 @@
+# Files and directories created by pub
+.dart_tool/
+.packages
+
+# Conventional directory for build outputs
+build/
+
+# Directory created by dartdoc
+doc/api/
+
+# Secrets & Passwords
+config/passwords.yaml
+config/passwords.yml
+config/*.local.yaml
+config/secrets/
+
+# OAuth credentials
+*.token
+token.json
+credentials.json

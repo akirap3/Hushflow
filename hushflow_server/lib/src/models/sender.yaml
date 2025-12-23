@@ -1,0 +1,19 @@
+class: Sender
+table: senders
+fields:
+  userId: int, relation(parent=users)
+  email: String
+  name: String?
+  isExcluded: bool
+  isBlocked: bool
+  totalEmails: int
+  openedEmails: int
+  lastEmailAt: DateTime?
+  createdAt: DateTime
+  updatedAt: DateTime
+indexes:
+  sender_user_email_idx:
+    fields: userId, email
+    unique: true
+  sender_user_excluded_idx:
+    fields: userId, isExcluded

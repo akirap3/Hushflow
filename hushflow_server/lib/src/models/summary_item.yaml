@@ -1,0 +1,14 @@
+class: SummaryItem
+table: summary_items
+fields:
+  summaryId: int, relation(parent=summaries)
+  emailId: int, relation(parent=emails)
+  sender: String
+  subject: String
+  summaryText: String
+  imageUrl: String?
+  priorityScore: double
+  order: int
+indexes:
+  summary_item_summary_idx:
+    fields: summaryId

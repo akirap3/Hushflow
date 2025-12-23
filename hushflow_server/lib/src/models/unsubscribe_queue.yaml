@@ -1,0 +1,14 @@
+class: UnsubscribeQueue
+table: unsubscribe_queue
+fields:
+  userId: int, relation(parent=users)
+  emailId: int, relation(parent=emails)
+  senderEmail: String
+  unsubscribeLink: String?
+  status: String
+  action: String?
+  processedAt: DateTime?
+  createdAt: DateTime
+indexes:
+  unsub_user_status_idx:
+    fields: userId, status

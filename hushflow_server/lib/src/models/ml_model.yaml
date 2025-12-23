@@ -1,0 +1,13 @@
+class: MlModel
+table: ml_models
+fields:
+  userId: int, relation(parent=users)
+  version: int
+  modelPath: String
+  trainingSize: int
+  accuracy: double?
+  trainedAt: DateTime
+  isActive: bool
+indexes:
+  model_user_active_idx:
+    fields: userId, isActive
