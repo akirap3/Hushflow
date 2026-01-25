@@ -6,9 +6,12 @@ fields:
   name: String?
   isExcluded: bool
   isBlocked: bool
+  isWhitelisted: bool          # User confirmed as subscription
+  isSubscription: bool         # System detected as subscription
   totalEmails: int
   openedEmails: int
   lastEmailAt: DateTime?
+  detectedAt: DateTime?        # When first detected as subscription
   createdAt: DateTime
   updatedAt: DateTime
 indexes:
@@ -17,3 +20,6 @@ indexes:
     unique: true
   sender_user_excluded_idx:
     fields: userId, isExcluded
+  sender_user_whitelist_idx:
+    fields: userId, isWhitelisted
+

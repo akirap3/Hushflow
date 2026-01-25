@@ -1,12 +1,19 @@
 import numpy as np
-import xgboost as xgb
 from typing import Dict, Any, List, Optional
 import os
 import pickle
 
+# Make xgboost optional - use heuristics if not available
+try:
+    import xgboost as xgb
+    HAS_XGBOOST = True
+except ImportError:
+    xgb = None
+    HAS_XGBOOST = False
+
 
 class EmailPredictor:
-    """XGBoost-based email priority predictor"""
+    """XGBoost-based email priority predictor (falls back to heuristics)"""
     
     FEATURE_ORDER = [
         'content_length',
@@ -26,12 +33,16 @@ class EmailPredictor:
         'sender_open_rate',
     ]
     
-    def __init__(self, model: Optional[xgb.Booster] = None):
+    def __init__(self, model = None):
         self.model = model
     
     @classmethod
     def get_default(cls) -> 'EmailPredictor':
         """Get or create default model"""
+        if not HAS_XGBOOST:
+            # No xgboost, use heuristics only
+            return cls(model=None)
+            
         default_path = os.path.join(os.path.dirname(__file__), '../../models/default.xgb')
         
         if os.path.exists(default_path):
@@ -43,6 +54,8 @@ class EmailPredictor:
     @classmethod
     def load(cls, path: str) -> 'EmailPredictor':
         """Load model from file"""
+        if not HAS_XGBOOST:
+            return cls(model=None)
         model = xgb.Booster()
         model.load_model(path)
         return cls(model=model)

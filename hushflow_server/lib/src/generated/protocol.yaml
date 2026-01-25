@@ -20,6 +20,15 @@ email:
   - triggerColdStart:
 example:
   - hello:
+ml:
+  - predictPriority:
+  - predictBatch:
+onboarding:
+  - scanForSubscriptions:
+  - confirmWhitelist:
+  - getWhitelist:
+  - addToWhitelist:
+  - removeFromWhitelist:
 summary:
   - listSummaries:
   - getSummary:

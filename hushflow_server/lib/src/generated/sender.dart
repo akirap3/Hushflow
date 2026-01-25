@@ -19,9 +19,12 @@ abstract class Sender extends _i1.TableRow {
     this.name,
     required this.isExcluded,
     required this.isBlocked,
+    required this.isWhitelisted,
+    required this.isSubscription,
     required this.totalEmails,
     required this.openedEmails,
     this.lastEmailAt,
+    this.detectedAt,
     required this.createdAt,
     required this.updatedAt,
   }) : super(id);
@@ -33,9 +36,12 @@ abstract class Sender extends _i1.TableRow {
     String? name,
     required bool isExcluded,
     required bool isBlocked,
+    required bool isWhitelisted,
+    required bool isSubscription,
     required int totalEmails,
     required int openedEmails,
     DateTime? lastEmailAt,
+    DateTime? detectedAt,
     required DateTime createdAt,
     required DateTime updatedAt,
   }) = _SenderImpl;
@@ -56,12 +62,18 @@ abstract class Sender extends _i1.TableRow {
           .deserialize<bool>(jsonSerialization['isExcluded']),
       isBlocked: serializationManager
           .deserialize<bool>(jsonSerialization['isBlocked']),
+      isWhitelisted: serializationManager
+          .deserialize<bool>(jsonSerialization['isWhitelisted']),
+      isSubscription: serializationManager
+          .deserialize<bool>(jsonSerialization['isSubscription']),
       totalEmails: serializationManager
           .deserialize<int>(jsonSerialization['totalEmails']),
       openedEmails: serializationManager
           .deserialize<int>(jsonSerialization['openedEmails']),
       lastEmailAt: serializationManager
           .deserialize<DateTime?>(jsonSerialization['lastEmailAt']),
+      detectedAt: serializationManager
+          .deserialize<DateTime?>(jsonSerialization['detectedAt']),
       createdAt: serializationManager
           .deserialize<DateTime>(jsonSerialization['createdAt']),
       updatedAt: serializationManager
@@ -83,11 +95,17 @@ abstract class Sender extends _i1.TableRow {
 
   bool isBlocked;
 
+  bool isWhitelisted;
+
+  bool isSubscription;
+
   int totalEmails;
 
   int openedEmails;
 
   DateTime? lastEmailAt;
+
+  DateTime? detectedAt;
 
   DateTime createdAt;
 
@@ -103,9 +121,12 @@ abstract class Sender extends _i1.TableRow {
     String? name,
     bool? isExcluded,
     bool? isBlocked,
+    bool? isWhitelisted,
+    bool? isSubscription,
     int? totalEmails,
     int? openedEmails,
     DateTime? lastEmailAt,
+    DateTime? detectedAt,
     DateTime? createdAt,
     DateTime? updatedAt,
   });
@@ -118,9 +139,12 @@ abstract class Sender extends _i1.TableRow {
       if (name != null) 'name': name,
       'isExcluded': isExcluded,
       'isBlocked': isBlocked,
+      'isWhitelisted': isWhitelisted,
+      'isSubscription': isSubscription,
       'totalEmails': totalEmails,
       'openedEmails': openedEmails,
       if (lastEmailAt != null) 'lastEmailAt': lastEmailAt?.toJson(),
+      if (detectedAt != null) 'detectedAt': detectedAt?.toJson(),
       'createdAt': createdAt.toJson(),
       'updatedAt': updatedAt.toJson(),
     };
@@ -136,9 +160,12 @@ abstract class Sender extends _i1.TableRow {
       'name': name,
       'isExcluded': isExcluded,
       'isBlocked': isBlocked,
+      'isWhitelisted': isWhitelisted,
+      'isSubscription': isSubscription,
       'totalEmails': totalEmails,
       'openedEmails': openedEmails,
       'lastEmailAt': lastEmailAt,
+      'detectedAt': detectedAt,
       'createdAt': createdAt,
       'updatedAt': updatedAt,
     };
@@ -153,9 +180,12 @@ abstract class Sender extends _i1.TableRow {
       if (name != null) 'name': name,
       'isExcluded': isExcluded,
       'isBlocked': isBlocked,
+      'isWhitelisted': isWhitelisted,
+      'isSubscription': isSubscription,
       'totalEmails': totalEmails,
       'openedEmails': openedEmails,
       if (lastEmailAt != null) 'lastEmailAt': lastEmailAt?.toJson(),
+      if (detectedAt != null) 'detectedAt': detectedAt?.toJson(),
       'createdAt': createdAt.toJson(),
       'updatedAt': updatedAt.toJson(),
     };
@@ -186,6 +216,12 @@ abstract class Sender extends _i1.TableRow {
       case 'isBlocked':
         isBlocked = value;
         return;
+      case 'isWhitelisted':
+        isWhitelisted = value;
+        return;
+      case 'isSubscription':
+        isSubscription = value;
+        return;
       case 'totalEmails':
         totalEmails = value;
         return;
@@ -194,6 +230,9 @@ abstract class Sender extends _i1.TableRow {
         return;
       case 'lastEmailAt':
         lastEmailAt = value;
+        return;
+      case 'detectedAt':
+        detectedAt = value;
         return;
       case 'createdAt':
         createdAt = value;
@@ -358,9 +397,12 @@ class _SenderImpl extends Sender {
     String? name,
     required bool isExcluded,
     required bool isBlocked,
+    required bool isWhitelisted,
+    required bool isSubscription,
     required int totalEmails,
     required int openedEmails,
     DateTime? lastEmailAt,
+    DateTime? detectedAt,
     required DateTime createdAt,
     required DateTime updatedAt,
   }) : super._(
@@ -370,9 +412,12 @@ class _SenderImpl extends Sender {
           name: name,
           isExcluded: isExcluded,
           isBlocked: isBlocked,
+          isWhitelisted: isWhitelisted,
+          isSubscription: isSubscription,
           totalEmails: totalEmails,
           openedEmails: openedEmails,
           lastEmailAt: lastEmailAt,
+          detectedAt: detectedAt,
           createdAt: createdAt,
           updatedAt: updatedAt,
         );
@@ -385,9 +430,12 @@ class _SenderImpl extends Sender {
     Object? name = _Undefined,
     bool? isExcluded,
     bool? isBlocked,
+    bool? isWhitelisted,
+    bool? isSubscription,
     int? totalEmails,
     int? openedEmails,
     Object? lastEmailAt = _Undefined,
+    Object? detectedAt = _Undefined,
     DateTime? createdAt,
     DateTime? updatedAt,
   }) {
@@ -398,9 +446,12 @@ class _SenderImpl extends Sender {
       name: name is String? ? name : this.name,
       isExcluded: isExcluded ?? this.isExcluded,
       isBlocked: isBlocked ?? this.isBlocked,
+      isWhitelisted: isWhitelisted ?? this.isWhitelisted,
+      isSubscription: isSubscription ?? this.isSubscription,
       totalEmails: totalEmails ?? this.totalEmails,
       openedEmails: openedEmails ?? this.openedEmails,
       lastEmailAt: lastEmailAt is DateTime? ? lastEmailAt : this.lastEmailAt,
+      detectedAt: detectedAt is DateTime? ? detectedAt : this.detectedAt,
       createdAt: createdAt ?? this.createdAt,
       updatedAt: updatedAt ?? this.updatedAt,
     );
@@ -429,6 +480,14 @@ class SenderTable extends _i1.Table {
       'isBlocked',
       this,
     );
+    isWhitelisted = _i1.ColumnBool(
+      'isWhitelisted',
+      this,
+    );
+    isSubscription = _i1.ColumnBool(
+      'isSubscription',
+      this,
+    );
     totalEmails = _i1.ColumnInt(
       'totalEmails',
       this,
@@ -439,6 +498,10 @@ class SenderTable extends _i1.Table {
     );
     lastEmailAt = _i1.ColumnDateTime(
       'lastEmailAt',
+      this,
+    );
+    detectedAt = _i1.ColumnDateTime(
+      'detectedAt',
       this,
     );
     createdAt = _i1.ColumnDateTime(
@@ -461,11 +524,17 @@ class SenderTable extends _i1.Table {
 
   late final _i1.ColumnBool isBlocked;
 
+  late final _i1.ColumnBool isWhitelisted;
+
+  late final _i1.ColumnBool isSubscription;
+
   late final _i1.ColumnInt totalEmails;
 
   late final _i1.ColumnInt openedEmails;
 
   late final _i1.ColumnDateTime lastEmailAt;
+
+  late final _i1.ColumnDateTime detectedAt;
 
   late final _i1.ColumnDateTime createdAt;
 
@@ -479,9 +548,12 @@ class SenderTable extends _i1.Table {
         name,
         isExcluded,
         isBlocked,
+        isWhitelisted,
+        isSubscription,
         totalEmails,
         openedEmails,
         lastEmailAt,
+        detectedAt,
         createdAt,
         updatedAt,
       ];

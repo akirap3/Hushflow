@@ -13,8 +13,11 @@ import '../endpoints/auth_endpoint.dart' as _i2;
 import '../endpoints/cleanup_endpoint.dart' as _i3;
 import '../endpoints/email_endpoint.dart' as _i4;
 import '../endpoints/example_endpoint.dart' as _i5;
-import '../endpoints/summary_endpoint.dart' as _i6;
-import '../endpoints/voice_endpoint.dart' as _i7;
+import '../endpoints/ml_endpoint.dart' as _i6;
+import '../endpoints/onboarding_endpoint.dart' as _i7;
+import '../endpoints/summary_endpoint.dart' as _i8;
+import '../endpoints/voice_endpoint.dart' as _i9;
+import 'package:hushflow_server/src/generated/sender_candidate.dart' as _i10;
 
 class Endpoints extends _i1.EndpointDispatch {
   @override
@@ -44,13 +47,25 @@ class Endpoints extends _i1.EndpointDispatch {
           'example',
           null,
         ),
-      'summary': _i6.SummaryEndpoint()
+      'ml': _i6.MlEndpoint()
+        ..initialize(
+          server,
+          'ml',
+          null,
+        ),
+      'onboarding': _i7.OnboardingEndpoint()
+        ..initialize(
+          server,
+          'onboarding',
+          null,
+        ),
+      'summary': _i8.SummaryEndpoint()
         ..initialize(
           server,
           'summary',
           null,
         ),
-      'voice': _i7.VoiceEndpoint()
+      'voice': _i9.VoiceEndpoint()
         ..initialize(
           server,
           'voice',
@@ -501,6 +516,220 @@ class Endpoints extends _i1.EndpointDispatch {
         )
       },
     );
+    connectors['ml'] = _i1.EndpointConnector(
+      name: 'ml',
+      endpoint: endpoints['ml']!,
+      methodConnectors: {
+        'predictPriority': _i1.MethodConnector(
+          name: 'predictPriority',
+          params: {
+            'userId': _i1.ParameterDescription(
+              name: 'userId',
+              type: _i1.getType<int>(),
+              nullable: false,
+            ),
+            'subject': _i1.ParameterDescription(
+              name: 'subject',
+              type: _i1.getType<String>(),
+              nullable: false,
+            ),
+            'body': _i1.ParameterDescription(
+              name: 'body',
+              type: _i1.getType<String>(),
+              nullable: false,
+            ),
+            'receivedAt': _i1.ParameterDescription(
+              name: 'receivedAt',
+              type: _i1.getType<DateTime>(),
+              nullable: false,
+            ),
+            'hasUnsubscribe': _i1.ParameterDescription(
+              name: 'hasUnsubscribe',
+              type: _i1.getType<bool>(),
+              nullable: false,
+            ),
+            'linkCount': _i1.ParameterDescription(
+              name: 'linkCount',
+              type: _i1.getType<int>(),
+              nullable: false,
+            ),
+            'imageCount': _i1.ParameterDescription(
+              name: 'imageCount',
+              type: _i1.getType<int>(),
+              nullable: false,
+            ),
+          },
+          call: (
+            _i1.Session session,
+            Map<String, dynamic> params,
+          ) async =>
+              (endpoints['ml'] as _i6.MlEndpoint).predictPriority(
+            session,
+            params['userId'],
+            params['subject'],
+            params['body'],
+            params['receivedAt'],
+            params['hasUnsubscribe'],
+            params['linkCount'],
+            params['imageCount'],
+          ),
+        ),
+        'predictBatch': _i1.MethodConnector(
+          name: 'predictBatch',
+          params: {
+            'userId': _i1.ParameterDescription(
+              name: 'userId',
+              type: _i1.getType<int>(),
+              nullable: false,
+            ),
+            'emailsData': _i1.ParameterDescription(
+              name: 'emailsData',
+              type: _i1.getType<List<Map<String, dynamic>>>(),
+              nullable: false,
+            ),
+          },
+          call: (
+            _i1.Session session,
+            Map<String, dynamic> params,
+          ) async =>
+              (endpoints['ml'] as _i6.MlEndpoint).predictBatch(
+            session,
+            params['userId'],
+            params['emailsData'],
+          ),
+        ),
+      },
+    );
+    connectors['onboarding'] = _i1.EndpointConnector(
+      name: 'onboarding',
+      endpoint: endpoints['onboarding']!,
+      methodConnectors: {
+        'scanForSubscriptions': _i1.MethodConnector(
+          name: 'scanForSubscriptions',
+          params: {
+            'accessToken': _i1.ParameterDescription(
+              name: 'accessToken',
+              type: _i1.getType<String>(),
+              nullable: false,
+            ),
+            'maxEmails': _i1.ParameterDescription(
+              name: 'maxEmails',
+              type: _i1.getType<int>(),
+              nullable: false,
+            ),
+          },
+          call: (
+            _i1.Session session,
+            Map<String, dynamic> params,
+          ) async =>
+              (endpoints['onboarding'] as _i7.OnboardingEndpoint)
+                  .scanForSubscriptions(
+            session,
+            params['accessToken'],
+            maxEmails: params['maxEmails'],
+          ),
+        ),
+        'confirmWhitelist': _i1.MethodConnector(
+          name: 'confirmWhitelist',
+          params: {
+            'userId': _i1.ParameterDescription(
+              name: 'userId',
+              type: _i1.getType<int>(),
+              nullable: false,
+            ),
+            'confirmedSenders': _i1.ParameterDescription(
+              name: 'confirmedSenders',
+              type: _i1.getType<List<_i10.SenderCandidate>>(),
+              nullable: false,
+            ),
+          },
+          call: (
+            _i1.Session session,
+            Map<String, dynamic> params,
+          ) async =>
+              (endpoints['onboarding'] as _i7.OnboardingEndpoint)
+                  .confirmWhitelist(
+            session,
+            params['userId'],
+            params['confirmedSenders'],
+          ),
+        ),
+        'getWhitelist': _i1.MethodConnector(
+          name: 'getWhitelist',
+          params: {
+            'userId': _i1.ParameterDescription(
+              name: 'userId',
+              type: _i1.getType<int>(),
+              nullable: false,
+            )
+          },
+          call: (
+            _i1.Session session,
+            Map<String, dynamic> params,
+          ) async =>
+              (endpoints['onboarding'] as _i7.OnboardingEndpoint).getWhitelist(
+            session,
+            params['userId'],
+          ),
+        ),
+        'addToWhitelist': _i1.MethodConnector(
+          name: 'addToWhitelist',
+          params: {
+            'userId': _i1.ParameterDescription(
+              name: 'userId',
+              type: _i1.getType<int>(),
+              nullable: false,
+            ),
+            'email': _i1.ParameterDescription(
+              name: 'email',
+              type: _i1.getType<String>(),
+              nullable: false,
+            ),
+            'name': _i1.ParameterDescription(
+              name: 'name',
+              type: _i1.getType<String?>(),
+              nullable: true,
+            ),
+          },
+          call: (
+            _i1.Session session,
+            Map<String, dynamic> params,
+          ) async =>
+              (endpoints['onboarding'] as _i7.OnboardingEndpoint)
+                  .addToWhitelist(
+            session,
+            params['userId'],
+            params['email'],
+            params['name'],
+          ),
+        ),
+        'removeFromWhitelist': _i1.MethodConnector(
+          name: 'removeFromWhitelist',
+          params: {
+            'userId': _i1.ParameterDescription(
+              name: 'userId',
+              type: _i1.getType<int>(),
+              nullable: false,
+            ),
+            'email': _i1.ParameterDescription(
+              name: 'email',
+              type: _i1.getType<String>(),
+              nullable: false,
+            ),
+          },
+          call: (
+            _i1.Session session,
+            Map<String, dynamic> params,
+          ) async =>
+              (endpoints['onboarding'] as _i7.OnboardingEndpoint)
+                  .removeFromWhitelist(
+            session,
+            params['userId'],
+            params['email'],
+          ),
+        ),
+      },
+    );
     connectors['summary'] = _i1.EndpointConnector(
       name: 'summary',
       endpoint: endpoints['summary']!,
@@ -528,7 +757,7 @@ class Endpoints extends _i1.EndpointDispatch {
             _i1.Session session,
             Map<String, dynamic> params,
           ) async =>
-              (endpoints['summary'] as _i6.SummaryEndpoint).listSummaries(
+              (endpoints['summary'] as _i8.SummaryEndpoint).listSummaries(
             session,
             params['userId'],
             params['page'],
@@ -548,7 +777,7 @@ class Endpoints extends _i1.EndpointDispatch {
             _i1.Session session,
             Map<String, dynamic> params,
           ) async =>
-              (endpoints['summary'] as _i6.SummaryEndpoint).getSummary(
+              (endpoints['summary'] as _i8.SummaryEndpoint).getSummary(
             session,
             params['summaryId'],
           ),
@@ -581,7 +810,7 @@ class Endpoints extends _i1.EndpointDispatch {
             _i1.Session session,
             Map<String, dynamic> params,
           ) async =>
-              (endpoints['summary'] as _i6.SummaryEndpoint).generateSummary(
+              (endpoints['summary'] as _i8.SummaryEndpoint).generateSummary(
             session,
             params['userId'],
             params['periodStart'],
@@ -602,7 +831,7 @@ class Endpoints extends _i1.EndpointDispatch {
             _i1.Session session,
             Map<String, dynamic> params,
           ) async =>
-              (endpoints['summary'] as _i6.SummaryEndpoint).markAsRead(
+              (endpoints['summary'] as _i8.SummaryEndpoint).markAsRead(
             session,
             params['summaryId'],
           ),
@@ -620,7 +849,7 @@ class Endpoints extends _i1.EndpointDispatch {
             _i1.Session session,
             Map<String, dynamic> params,
           ) async =>
-              (endpoints['summary'] as _i6.SummaryEndpoint).getAudioUrl(
+              (endpoints['summary'] as _i8.SummaryEndpoint).getAudioUrl(
             session,
             params['summaryId'],
           ),
@@ -648,7 +877,7 @@ class Endpoints extends _i1.EndpointDispatch {
             _i1.Session session,
             Map<String, dynamic> params,
           ) async =>
-              (endpoints['summary'] as _i6.SummaryEndpoint).setSchedule(
+              (endpoints['summary'] as _i8.SummaryEndpoint).setSchedule(
             session,
             params['userId'],
             params['cronExpression'],
@@ -668,7 +897,7 @@ class Endpoints extends _i1.EndpointDispatch {
             _i1.Session session,
             Map<String, dynamic> params,
           ) async =>
-              (endpoints['summary'] as _i6.SummaryEndpoint).getSchedule(
+              (endpoints['summary'] as _i8.SummaryEndpoint).getSchedule(
             session,
             params['userId'],
           ),
@@ -692,7 +921,7 @@ class Endpoints extends _i1.EndpointDispatch {
             _i1.Session session,
             Map<String, dynamic> params,
           ) async =>
-              (endpoints['voice'] as _i7.VoiceEndpoint).parseIntent(
+              (endpoints['voice'] as _i9.VoiceEndpoint).parseIntent(
             session,
             params['transcript'],
           ),
@@ -715,7 +944,7 @@ class Endpoints extends _i1.EndpointDispatch {
             _i1.Session session,
             Map<String, dynamic> params,
           ) async =>
-              (endpoints['voice'] as _i7.VoiceEndpoint).generateBriefing(
+              (endpoints['voice'] as _i9.VoiceEndpoint).generateBriefing(
             session,
             params['userId'],
             params['maxEmails'],
@@ -744,7 +973,7 @@ class Endpoints extends _i1.EndpointDispatch {
             _i1.Session session,
             Map<String, dynamic> params,
           ) async =>
-              (endpoints['voice'] as _i7.VoiceEndpoint).executeAction(
+              (endpoints['voice'] as _i9.VoiceEndpoint).executeAction(
             session,
             params['userId'],
             params['intent'],

@@ -1,0 +1,7 @@
+class: SenderCandidate
+fields:
+  email: String
+  name: String?
+  isSubscription: bool
+  subscriptionSignals: List<String>
+  emailCount: int

@@ -1,11 +1,18 @@
 import numpy as np
-import xgboost as xgb
 from typing import Dict, Any, List, Optional
-from sklearn.model_selection import train_test_split
-from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score
 import os
 import json
 from datetime import datetime
+
+# Make xgboost and sklearn optional
+try:
+    import xgboost as xgb
+    from sklearn.model_selection import train_test_split
+    from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score
+    HAS_ML_DEPS = True
+except ImportError:
+    xgb = None
+    HAS_ML_DEPS = False
 
 
 class XGBoostTrainer:

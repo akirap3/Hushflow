@@ -18,9 +18,12 @@ abstract class Sender extends _i1.SerializableEntity {
     this.name,
     required this.isExcluded,
     required this.isBlocked,
+    required this.isWhitelisted,
+    required this.isSubscription,
     required this.totalEmails,
     required this.openedEmails,
     this.lastEmailAt,
+    this.detectedAt,
     required this.createdAt,
     required this.updatedAt,
   });
@@ -32,9 +35,12 @@ abstract class Sender extends _i1.SerializableEntity {
     String? name,
     required bool isExcluded,
     required bool isBlocked,
+    required bool isWhitelisted,
+    required bool isSubscription,
     required int totalEmails,
     required int openedEmails,
     DateTime? lastEmailAt,
+    DateTime? detectedAt,
     required DateTime createdAt,
     required DateTime updatedAt,
   }) = _SenderImpl;
@@ -55,12 +61,18 @@ abstract class Sender extends _i1.SerializableEntity {
           .deserialize<bool>(jsonSerialization['isExcluded']),
       isBlocked: serializationManager
           .deserialize<bool>(jsonSerialization['isBlocked']),
+      isWhitelisted: serializationManager
+          .deserialize<bool>(jsonSerialization['isWhitelisted']),
+      isSubscription: serializationManager
+          .deserialize<bool>(jsonSerialization['isSubscription']),
       totalEmails: serializationManager
           .deserialize<int>(jsonSerialization['totalEmails']),
       openedEmails: serializationManager
           .deserialize<int>(jsonSerialization['openedEmails']),
       lastEmailAt: serializationManager
           .deserialize<DateTime?>(jsonSerialization['lastEmailAt']),
+      detectedAt: serializationManager
+          .deserialize<DateTime?>(jsonSerialization['detectedAt']),
       createdAt: serializationManager
           .deserialize<DateTime>(jsonSerialization['createdAt']),
       updatedAt: serializationManager
@@ -83,11 +95,17 @@ abstract class Sender extends _i1.SerializableEntity {
 
   bool isBlocked;
 
+  bool isWhitelisted;
+
+  bool isSubscription;
+
   int totalEmails;
 
   int openedEmails;
 
   DateTime? lastEmailAt;
+
+  DateTime? detectedAt;
 
   DateTime createdAt;
 
@@ -100,9 +118,12 @@ abstract class Sender extends _i1.SerializableEntity {
     String? name,
     bool? isExcluded,
     bool? isBlocked,
+    bool? isWhitelisted,
+    bool? isSubscription,
     int? totalEmails,
     int? openedEmails,
     DateTime? lastEmailAt,
+    DateTime? detectedAt,
     DateTime? createdAt,
     DateTime? updatedAt,
   });
@@ -115,9 +136,12 @@ abstract class Sender extends _i1.SerializableEntity {
       if (name != null) 'name': name,
       'isExcluded': isExcluded,
       'isBlocked': isBlocked,
+      'isWhitelisted': isWhitelisted,
+      'isSubscription': isSubscription,
       'totalEmails': totalEmails,
       'openedEmails': openedEmails,
       if (lastEmailAt != null) 'lastEmailAt': lastEmailAt?.toJson(),
+      if (detectedAt != null) 'detectedAt': detectedAt?.toJson(),
       'createdAt': createdAt.toJson(),
       'updatedAt': updatedAt.toJson(),
     };
@@ -134,9 +158,12 @@ class _SenderImpl extends Sender {
     String? name,
     required bool isExcluded,
     required bool isBlocked,
+    required bool isWhitelisted,
+    required bool isSubscription,
     required int totalEmails,
     required int openedEmails,
     DateTime? lastEmailAt,
+    DateTime? detectedAt,
     required DateTime createdAt,
     required DateTime updatedAt,
   }) : super._(
@@ -146,9 +173,12 @@ class _SenderImpl extends Sender {
           name: name,
           isExcluded: isExcluded,
           isBlocked: isBlocked,
+          isWhitelisted: isWhitelisted,
+          isSubscription: isSubscription,
           totalEmails: totalEmails,
           openedEmails: openedEmails,
           lastEmailAt: lastEmailAt,
+          detectedAt: detectedAt,
           createdAt: createdAt,
           updatedAt: updatedAt,
         );
@@ -161,9 +191,12 @@ class _SenderImpl extends Sender {
     Object? name = _Undefined,
     bool? isExcluded,
     bool? isBlocked,
+    bool? isWhitelisted,
+    bool? isSubscription,
     int? totalEmails,
     int? openedEmails,
     Object? lastEmailAt = _Undefined,
+    Object? detectedAt = _Undefined,
     DateTime? createdAt,
     DateTime? updatedAt,
   }) {
@@ -174,9 +207,12 @@ class _SenderImpl extends Sender {
       name: name is String? ? name : this.name,
       isExcluded: isExcluded ?? this.isExcluded,
       isBlocked: isBlocked ?? this.isBlocked,
+      isWhitelisted: isWhitelisted ?? this.isWhitelisted,
+      isSubscription: isSubscription ?? this.isSubscription,
       totalEmails: totalEmails ?? this.totalEmails,
       openedEmails: openedEmails ?? this.openedEmails,
       lastEmailAt: lastEmailAt is DateTime? ? lastEmailAt : this.lastEmailAt,
+      detectedAt: detectedAt is DateTime? ? detectedAt : this.detectedAt,
       createdAt: createdAt ?? this.createdAt,
       updatedAt: updatedAt ?? this.updatedAt,
     );

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 
 class SettingsScreen extends ConsumerWidget {
   const SettingsScreen({super.key});
@@ -15,6 +16,27 @@ class SettingsScreen extends ConsumerWidget {
           title: const Text('user@example.com'),
           subtitle: const Text('Google Account'),
           trailing: const Icon(Icons.chevron_right),
+        ),
+        const Divider(),
+        const _SectionHeader(title: 'Whitelist'),
+        ListTile(
+          leading: const Icon(Icons.check_circle_outline),
+          title: const Text('Whitelisted Senders'),
+          subtitle: const Text('Manage subscription senders'),
+          trailing: const Icon(Icons.chevron_right),
+          onTap: () {
+            // TODO: Navigate to whitelist detail screen
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(content: Text('Whitelist management coming soon')),
+            );
+          },
+        ),
+        ListTile(
+          leading: const Icon(Icons.refresh),
+          title: const Text('Rescan Inbox'),
+          subtitle: const Text('Find new subscription senders'),
+          trailing: const Icon(Icons.chevron_right),
+          onTap: () => context.push('/onboarding/whitelist'),
         ),
         const Divider(),
         const _SectionHeader(title: 'Summary Settings'),

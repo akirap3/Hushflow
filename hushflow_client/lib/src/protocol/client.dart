@@ -10,7 +10,10 @@
 // ignore_for_file: no_leading_underscores_for_library_prefixes
 import 'package:serverpod_client/serverpod_client.dart' as _i1;
 import 'dart:async' as _i2;
-import 'protocol.dart' as _i3;
+import 'package:hushflow_client/src/protocol/sender_candidate.dart' as _i3;
+import 'package:hushflow_client/src/protocol/whitelist_confirm_result.dart'
+    as _i4;
+import 'protocol.dart' as _i5;
 
 /// Auth Endpoint
 /// Handles Gmail OAuth flow and user session management
@@ -268,6 +271,133 @@ class EndpointExample extends _i1.EndpointRef {
       );
 }
 
+/// ML Endpoint
+/// Provides email priority predictions using the Python ML service
+/// {@category Endpoint}
+class EndpointMl extends _i1.EndpointRef {
+  EndpointMl(_i1.EndpointCaller caller) : super(caller);
+
+  @override
+  String get name => 'ml';
+
+  /// Get priority score for a single email
+  _i2.Future<double> predictPriority(
+    int userId,
+    String subject,
+    String body,
+    DateTime receivedAt,
+    bool hasUnsubscribe,
+    int linkCount,
+    int imageCount,
+  ) =>
+      caller.callServerEndpoint<double>(
+        'ml',
+        'predictPriority',
+        {
+          'userId': userId,
+          'subject': subject,
+          'body': body,
+          'receivedAt': receivedAt,
+          'hasUnsubscribe': hasUnsubscribe,
+          'linkCount': linkCount,
+          'imageCount': imageCount,
+        },
+      );
+
+  /// Get priority scores for multiple emails (batch)
+  /// Each email should be a map with: subject, body, receivedAt, hasUnsubscribe, linkCount, imageCount
+  _i2.Future<List<double>> predictBatch(
+    int userId,
+    List<Map<String, dynamic>> emailsData,
+  ) =>
+      caller.callServerEndpoint<List<double>>(
+        'ml',
+        'predictBatch',
+        {
+          'userId': userId,
+          'emailsData': emailsData,
+        },
+      );
+}
+
+/// Onboarding Endpoint
+/// Handles first-time Gmail scanning and whitelist confirmation
+/// {@category Endpoint}
+class EndpointOnboarding extends _i1.EndpointRef {
+  EndpointOnboarding(_i1.EndpointCaller caller) : super(caller);
+
+  @override
+  String get name => 'onboarding';
+
+  /// Scan Gmail for subscription/newsletter senders
+  /// Called on first login to build whitelist candidates
+  _i2.Future<List<_i3.SenderCandidate>> scanForSubscriptions(
+    String accessToken, {
+    required int maxEmails,
+  }) =>
+      caller.callServerEndpoint<List<_i3.SenderCandidate>>(
+        'onboarding',
+        'scanForSubscriptions',
+        {
+          'accessToken': accessToken,
+          'maxEmails': maxEmails,
+        },
+      );
+
+  /// Confirm whitelist selections from user
+  /// Creates Sender records with isWhitelisted = true for confirmed senders
+  _i2.Future<_i4.WhitelistConfirmResult> confirmWhitelist(
+    int userId,
+    List<_i3.SenderCandidate> confirmedSenders,
+  ) =>
+      caller.callServerEndpoint<_i4.WhitelistConfirmResult>(
+        'onboarding',
+        'confirmWhitelist',
+        {
+          'userId': userId,
+          'confirmedSenders': confirmedSenders,
+        },
+      );
+
+  /// Get current whitelist for user
+  _i2.Future<List<Map<String, dynamic>>> getWhitelist(int userId) =>
+      caller.callServerEndpoint<List<Map<String, dynamic>>>(
+        'onboarding',
+        'getWhitelist',
+        {'userId': userId},
+      );
+
+  /// Add sender to whitelist
+  _i2.Future<bool> addToWhitelist(
+    int userId,
+    String email,
+    String? name,
+  ) =>
+      caller.callServerEndpoint<bool>(
+        'onboarding',
+        'addToWhitelist',
+        {
+          'userId': userId,
+          'email': email,
+          'name': name,
+        },
+      );
+
+  /// Remove sender from whitelist
+  _i2.Future<bool> removeFromWhitelist(
+    int userId,
+    String email,
+  ) =>
+      caller.callServerEndpoint<bool>(
+        'onboarding',
+        'removeFromWhitelist',
+        {
+          'userId': userId,
+          'email': email,
+        },
+      );
+}
+
 /// Summary Endpoint
 /// Handles AI-generated email digest summaries
 /// {@category Endpoint}
@@ -416,7 +546,7 @@ class Client extends _i1.ServerpodClient {
     Duration? connectionTimeout,
   }) : super(
           host,
-          _i3.Protocol(),
+          _i5.Protocol(),
           securityContext: securityContext,
           authenticationKeyManager: authenticationKeyManager,
           streamingConnectionTimeout: streamingConnectionTimeout,
@@ -426,6 +556,8 @@ class Client extends _i1.ServerpodClient {
     cleanup = EndpointCleanup(this);
     email = EndpointEmail(this);
     example = EndpointExample(this);
+    ml = EndpointMl(this);
+    onboarding = EndpointOnboarding(this);
     summary = EndpointSummary(this);
     voice = EndpointVoice(this);
   }
@@ -438,6 +570,10 @@ class Client extends _i1.ServerpodClient {
 
   late final EndpointExample example;
 
+  late final EndpointMl ml;
+
+  late final EndpointOnboarding onboarding;
+
   late final EndpointSummary summary;
 
   late final EndpointVoice voice;
@@ -448,6 +584,8 @@ class Client extends _i1.ServerpodClient {
         'cleanup': cleanup,
         'email': email,
         'example': example,
+        'ml': ml,
+        'onboarding': onboarding,
         'summary': summary,
         'voice': voice,
       };

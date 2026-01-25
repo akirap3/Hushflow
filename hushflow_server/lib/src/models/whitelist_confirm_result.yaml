@@ -1,0 +1,6 @@
+class: WhitelistConfirmResult
+fields:
+  success: bool
+  created: int
+  updated: int
+  totalWhitelisted: int
