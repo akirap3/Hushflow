@@ -21,8 +21,8 @@ dependencies:
   # State Management
   flutter_riverpod: ^2.3.6
 
-  # UI Components - compatible with Flutter 3.10
-  flex_color_scheme: ^7.0.5
+  # UI Components
+  flex_color_scheme: ^8.0.0
 
   # Navigation
   go_router: ^10.0.0
