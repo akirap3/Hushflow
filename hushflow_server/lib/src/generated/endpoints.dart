@@ -771,17 +771,7 @@ class Endpoints extends _i1.EndpointDispatch {
               name: 'userId',
               type: _i1.getType<int>(),
               nullable: false,
-            ),
-            'page': _i1.ParameterDescription(
-              name: 'page',
-              type: _i1.getType<int>(),
-              nullable: false,
-            ),
-            'pageSize': _i1.ParameterDescription(
-              name: 'pageSize',
-              type: _i1.getType<int>(),
-              nullable: false,
-            ),
+            )
           },
           call: (
             _i1.Session session,
@@ -790,116 +780,19 @@ class Endpoints extends _i1.EndpointDispatch {
               (endpoints['summary'] as _i8.SummaryEndpoint).listSummaries(
             session,
             params['userId'],
-            params['page'],
-            params['pageSize'],
           ),
         ),
-        'getSummary': _i1.MethodConnector(
-          name: 'getSummary',
+        'getSummaryDetails': _i1.MethodConnector(
+          name: 'getSummaryDetails',
           params: {
-            'summaryId': _i1.ParameterDescription(
-              name: 'summaryId',
-              type: _i1.getType<int>(),
-              nullable: false,
-            )
-          },
-          call: (
-            _i1.Session session,
-            Map<String, dynamic> params,
-          ) async =>
-              (endpoints['summary'] as _i8.SummaryEndpoint).getSummary(
-            session,
-            params['summaryId'],
-          ),
-        ),
-        'generateSummary': _i1.MethodConnector(
-          name: 'generateSummary',
-          params: {
-            'userId': _i1.ParameterDescription(
-              name: 'userId',
-              type: _i1.getType<int>(),
-              nullable: false,
-            ),
-            'periodStart': _i1.ParameterDescription(
-              name: 'periodStart',
-              type: _i1.getType<DateTime>(),
-              nullable: false,
-            ),
-            'periodEnd': _i1.ParameterDescription(
-              name: 'periodEnd',
-              type: _i1.getType<DateTime>(),
-              nullable: false,
-            ),
-            'includeAudio': _i1.ParameterDescription(
-              name: 'includeAudio',
-              type: _i1.getType<bool>(),
-              nullable: false,
-            ),
-          },
-          call: (
-            _i1.Session session,
-            Map<String, dynamic> params,
-          ) async =>
-              (endpoints['summary'] as _i8.SummaryEndpoint).generateSummary(
-            session,
-            params['userId'],
-            params['periodStart'],
-            params['periodEnd'],
-            params['includeAudio'],
-          ),
-        ),
-        'markAsRead': _i1.MethodConnector(
-          name: 'markAsRead',
-          params: {
-            'summaryId': _i1.ParameterDescription(
-              name: 'summaryId',
-              type: _i1.getType<int>(),
-              nullable: false,
-            )
-          },
-          call: (
-            _i1.Session session,
-            Map<String, dynamic> params,
-          ) async =>
-              (endpoints['summary'] as _i8.SummaryEndpoint).markAsRead(
-            session,
-            params['summaryId'],
-          ),
-        ),
-        'getAudioUrl': _i1.MethodConnector(
-          name: 'getAudioUrl',
-          params: {
-            'summaryId': _i1.ParameterDescription(
-              name: 'summaryId',
-              type: _i1.getType<int>(),
-              nullable: false,
-            )
-          },
-          call: (
-            _i1.Session session,
-            Map<String, dynamic> params,
-          ) async =>
-              (endpoints['summary'] as _i8.SummaryEndpoint).getAudioUrl(
-            session,
-            params['summaryId'],
-          ),
-        ),
-        'setSchedule': _i1.MethodConnector(
-          name: 'setSchedule',
-          params: {
-            'userId': _i1.ParameterDescription(
-              name: 'userId',
-              type: _i1.getType<int>(),
-              nullable: false,
-            ),
-            'cronExpression': _i1.ParameterDescription(
-              name: 'cronExpression',
+            'accessToken': _i1.ParameterDescription(
+              name: 'accessToken',
               type: _i1.getType<String>(),
               nullable: false,
             ),
-            'timezone': _i1.ParameterDescription(
-              name: 'timezone',
-              type: _i1.getType<String>(),
+            'summaryId': _i1.ParameterDescription(
+              name: 'summaryId',
+              type: _i1.getType<int>(),
               nullable: false,
             ),
           },
@@ -907,29 +800,10 @@ class Endpoints extends _i1.EndpointDispatch {
             _i1.Session session,
             Map<String, dynamic> params,
           ) async =>
-              (endpoints['summary'] as _i8.SummaryEndpoint).setSchedule(
+              (endpoints['summary'] as _i8.SummaryEndpoint).getSummaryDetails(
             session,
-            params['userId'],
-            params['cronExpression'],
-            params['timezone'],
-          ),
-        ),
-        'getSchedule': _i1.MethodConnector(
-          name: 'getSchedule',
-          params: {
-            'userId': _i1.ParameterDescription(
-              name: 'userId',
-              type: _i1.getType<int>(),
-              nullable: false,
-            )
-          },
-          call: (
-            _i1.Session session,
-            Map<String, dynamic> params,
-          ) async =>
-              (endpoints['summary'] as _i8.SummaryEndpoint).getSchedule(
-            session,
-            params['userId'],
+            params['accessToken'],
+            params['summaryId'],
           ),
         ),
       },

@@ -14,7 +14,9 @@ import 'package:hushflow_client/src/protocol/sender_priority.dart' as _i3;
 import 'package:hushflow_client/src/protocol/sender_candidate.dart' as _i4;
 import 'package:hushflow_client/src/protocol/whitelist_confirm_result.dart'
     as _i5;
-import 'protocol.dart' as _i6;
+import 'package:hushflow_client/src/protocol/summary.dart' as _i6;
+import 'package:hushflow_client/src/protocol/summary_details.dart' as _i7;
+import 'protocol.dart' as _i8;
 
 /// Auth Endpoint
 /// Handles Gmail OAuth flow and user session management
@@ -424,85 +426,28 @@ class EndpointSummary extends _i1.EndpointRef {
   @override
   String get name => 'summary';
 
-  /// Get paginated list of summaries
-  _i2.Future<Map<String, dynamic>> listSummaries(
-    int userId,
-    int page,
-    int pageSize,
-  ) =>
-      caller.callServerEndpoint<Map<String, dynamic>>(
+  /// Get list of summaries
+  /// Currently generates dynamic "Weekly Digests" for demonstration
+  _i2.Future<List<_i6.Summary>> listSummaries(int userId) =>
+      caller.callServerEndpoint<List<_i6.Summary>>(
         'summary',
         'listSummaries',
-        {
-          'userId': userId,
-          'page': page,
-          'pageSize': pageSize,
-        },
-      );
-
-  /// Get single summary with items
-  _i2.Future<Map<String, dynamic>?> getSummary(int summaryId) =>
-      caller.callServerEndpoint<Map<String, dynamic>?>(
-        'summary',
-        'getSummary',
-        {'summaryId': summaryId},
-      );
-
-  /// Generate a new summary for time period
-  _i2.Future<Map<String, dynamic>> generateSummary(
-    int userId,
-    DateTime periodStart,
-    DateTime periodEnd,
-    bool includeAudio,
-  ) =>
-      caller.callServerEndpoint<Map<String, dynamic>>(
-        'summary',
-        'generateSummary',
-        {
-          'userId': userId,
-          'periodStart': periodStart,
-          'periodEnd': periodEnd,
-          'includeAudio': includeAudio,
-        },
-      );
-
-  /// Mark summary as read
-  _i2.Future<bool> markAsRead(int summaryId) => caller.callServerEndpoint<bool>(
-        'summary',
-        'markAsRead',
-        {'summaryId': summaryId},
-      );
-
-  /// Get audio URL for summary
-  _i2.Future<String?> getAudioUrl(int summaryId) =>
-      caller.callServerEndpoint<String?>(
-        'summary',
-        'getAudioUrl',
-        {'summaryId': summaryId},
-      );
-
-  /// Set summary schedule for user
-  _i2.Future<bool> setSchedule(
-    int userId,
-    String cronExpression,
-    String timezone,
-  ) =>
-      caller.callServerEndpoint<bool>(
-        'summary',
-        'setSchedule',
-        {
-          'userId': userId,
-          'cronExpression': cronExpression,
-          'timezone': timezone,
-        },
-      );
-
-  /// Get current schedule
-  _i2.Future<Map<String, dynamic>?> getSchedule(int userId) =>
-      caller.callServerEndpoint<Map<String, dynamic>?>(
-        'summary',
-        'getSchedule',
         {'userId': userId},
+      );
+
+  /// Get single summary with items populated from real Gmail data
+  /// This simulates a "Weekly Digest" by fetching the user's recent emails
+  _i2.Future<_i7.SummaryDetails?> getSummaryDetails(
+    String accessToken,
+    int summaryId,
+  ) =>
+      caller.callServerEndpoint<_i7.SummaryDetails?>(
+        'summary',
+        'getSummaryDetails',
+        {
+          'accessToken': accessToken,
+          'summaryId': summaryId,
+        },
       );
 }
 
@@ -563,7 +508,7 @@ class Client extends _i1.ServerpodClient {
     Duration? connectionTimeout,
   }) : super(
           host,
-          _i6.Protocol(),
+          _i8.Protocol(),
           securityContext: securityContext,
           authenticationKeyManager: authenticationKeyManager,
           streamingConnectionTimeout: streamingConnectionTimeout,

@@ -32,12 +32,7 @@ onboarding:
   - removeFromWhitelist:
 summary:
   - listSummaries:
-  - getSummary:
-  - generateSummary:
-  - markAsRead:
-  - getAudioUrl:
-  - setSchedule:
-  - getSchedule:
+  - getSummaryDetails:
 voice:
   - parseIntent:
   - generateBriefing:
