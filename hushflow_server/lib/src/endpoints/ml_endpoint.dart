@@ -1,5 +1,7 @@
 import 'package:serverpod/serverpod.dart';
 import '../services/ml_service.dart';
+import '../services/gmail_service.dart';
+import '../generated/sender_priority.dart';
 
 /// ML Endpoint
 /// Provides email priority predictions using the Python ML service
@@ -84,5 +86,130 @@ class MlEndpoint extends Endpoint {
       session.log('Batch ML prediction failed: $e');
       return List.filled(emailsData.length, 0.5);
     }
+  }
+  /// Analyze inbox and group by sender with priority scores
+  Future<List<SenderPriority>> analyzeInbox(
+    Session session,
+    String accessToken,
+    int userId, {
+    int maxEmails = 50,
+  }) async {
+    session.log('Analyzing inbox for user $userId');
+    
+    final gmail = GmailService(accessToken);
+    
+    // Fetch recent emails
+    final messages = await gmail.fetchMessages(maxResults: maxEmails);
+    
+    if (messages.isEmpty) {
+      return [];
+    }
+    
+    // 1. Extract features and prepare for prediction
+    final featuresList = <Map<String, dynamic>>[];
+    final emailInfos = <Map<String, dynamic>>[];
+    
+    for (final msg in messages) {
+      final headers = msg['headers'] as Map<String, String>? ?? {};
+      final subject = headers['subject'] ?? '(no subject)';
+      final from = headers['from'] ?? 'unknown';
+      final body = msg['snippet'] as String? ?? '';
+      
+      final labelIds = (msg['labelIds'] as List<dynamic>?)?.cast<String>() ?? [];
+      final isRead = !labelIds.contains('UNREAD');
+      
+      final dateStr = headers['date'];
+      DateTime receivedAt;
+      try {
+        receivedAt = dateStr != null 
+          ? DateTime.tryParse(dateStr) ?? DateTime.now()
+          : DateTime.now();
+      } catch (e) {
+        receivedAt = DateTime.now();
+      }
+      
+      final hasUnsubscribe = headers.containsKey('list-unsubscribe');
+      
+      featuresList.add(MlService.extractFeatures(
+        subject: subject,
+        body: body,
+        receivedAt: receivedAt,
+        hasUnsubscribe: hasUnsubscribe,
+        linkCount: RegExp(r'https?://').allMatches(body).length,
+        imageCount: 0,
+      ));
+      
+      emailInfos.add({
+        'id': msg['id'],
+        'subject': subject,
+        'from': from,
+        'receivedAt': receivedAt,
+        'snippet': body.length > 100 ? '${body.substring(0, 100)}...' : body,
+        'hasUnsubscribe': hasUnsubscribe,
+        'isRead': isRead,
+      });
+    }
+    
+    // 2. Get predictions
+    List<double> scores;
+    try {
+      scores = await _mlService.predictBatch(
+        userId: userId,
+        featuresList: featuresList,
+      );
+    } catch (e) {
+      session.log('Batch prediction failed: $e');
+      scores = List.filled(emailInfos.length, 0.5);
+    }
+    
+    // 3. Group by Sender
+    final senderGroups = <String, SenderPriority>{};
+    
+    for (var i = 0; i < emailInfos.length; i++) {
+        final info = emailInfos[i];
+        final score = scores[i];
+        final rawFrom = info['from'] as String;
+        
+        // Extract email address for grouping
+        final emailMatch = RegExp(r'<([^>]+)>').firstMatch(rawFrom);
+        final email = emailMatch != null ? emailMatch.group(1)!.toLowerCase() : rawFrom.trim().toLowerCase();
+        
+        final currentPriority = senderGroups[email];
+        
+        if (currentPriority == null) {
+          senderGroups[email] = SenderPriority(
+            email: email,
+            name: rawFrom.contains('<') ? rawFrom.split('<')[0].trim().replaceAll('"', '') : rawFrom,
+            maxScore: score,
+            latestSnippet: info['snippet'],
+            latestReceivedAt: info['receivedAt'],
+            emailCount: 1,
+            isWhitelisted: false, // Default
+          );
+        } else {
+            // Update if this email has higher score or is newer
+            // Use MAX score logic as requested
+            if (score > currentPriority.maxScore) {
+                currentPriority.maxScore = score;
+            }
+            
+            // Update snippet if newer
+            if ((info['receivedAt'] as DateTime).isAfter(currentPriority.latestReceivedAt)) {
+                currentPriority.latestReceivedAt = info['receivedAt'];
+                currentPriority.latestSnippet = info['snippet'];
+            }
+            
+            currentPriority.emailCount++;
+        }
+    }
+    
+    final results = senderGroups.values.toList();
+    
+    // Sort by max priority (highest first)
+    results.sort((a, b) => b.maxScore.compareTo(a.maxScore));
+    
+    session.log('Analyzed ${results.length} senders from ${emailInfos.length} emails');
+    
+    return results;
   }
 }

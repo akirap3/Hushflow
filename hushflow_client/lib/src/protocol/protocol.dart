@@ -17,13 +17,15 @@ import 'exclusion.dart' as _i5;
 import 'ml_model.dart' as _i6;
 import 'sender.dart' as _i7;
 import 'sender_candidate.dart' as _i8;
-import 'summary.dart' as _i9;
-import 'summary_item.dart' as _i10;
-import 'unsubscribe_queue.dart' as _i11;
-import 'user.dart' as _i12;
-import 'webhook_log.dart' as _i13;
-import 'whitelist_confirm_result.dart' as _i14;
-import 'package:hushflow_client/src/protocol/sender_candidate.dart' as _i15;
+import 'sender_priority.dart' as _i9;
+import 'summary.dart' as _i10;
+import 'summary_item.dart' as _i11;
+import 'unsubscribe_queue.dart' as _i12;
+import 'user.dart' as _i13;
+import 'webhook_log.dart' as _i14;
+import 'whitelist_confirm_result.dart' as _i15;
+import 'package:hushflow_client/src/protocol/sender_priority.dart' as _i16;
+import 'package:hushflow_client/src/protocol/sender_candidate.dart' as _i17;
 export 'email.dart';
 export 'email_feature.dart';
 export 'example.dart';
@@ -31,6 +33,7 @@ export 'exclusion.dart';
 export 'ml_model.dart';
 export 'sender.dart';
 export 'sender_candidate.dart';
+export 'sender_priority.dart';
 export 'summary.dart';
 export 'summary_item.dart';
 export 'unsubscribe_queue.dart';
@@ -78,23 +81,26 @@ class Protocol extends _i1.SerializationManager {
     if (t == _i8.SenderCandidate) {
       return _i8.SenderCandidate.fromJson(data, this) as T;
     }
-    if (t == _i9.Summary) {
-      return _i9.Summary.fromJson(data, this) as T;
+    if (t == _i9.SenderPriority) {
+      return _i9.SenderPriority.fromJson(data, this) as T;
     }
-    if (t == _i10.SummaryItem) {
-      return _i10.SummaryItem.fromJson(data, this) as T;
+    if (t == _i10.Summary) {
+      return _i10.Summary.fromJson(data, this) as T;
     }
-    if (t == _i11.UnsubscribeQueue) {
-      return _i11.UnsubscribeQueue.fromJson(data, this) as T;
+    if (t == _i11.SummaryItem) {
+      return _i11.SummaryItem.fromJson(data, this) as T;
     }
-    if (t == _i12.User) {
-      return _i12.User.fromJson(data, this) as T;
+    if (t == _i12.UnsubscribeQueue) {
+      return _i12.UnsubscribeQueue.fromJson(data, this) as T;
     }
-    if (t == _i13.WebhookLog) {
-      return _i13.WebhookLog.fromJson(data, this) as T;
+    if (t == _i13.User) {
+      return _i13.User.fromJson(data, this) as T;
     }
-    if (t == _i14.WhitelistConfirmResult) {
-      return _i14.WhitelistConfirmResult.fromJson(data, this) as T;
+    if (t == _i14.WebhookLog) {
+      return _i14.WebhookLog.fromJson(data, this) as T;
+    }
+    if (t == _i15.WhitelistConfirmResult) {
+      return _i15.WhitelistConfirmResult.fromJson(data, this) as T;
     }
     if (t == _i1.getType<_i2.Email?>()) {
       return (data != null ? _i2.Email.fromJson(data, this) : null) as T;
@@ -118,25 +124,29 @@ class Protocol extends _i1.SerializationManager {
       return (data != null ? _i8.SenderCandidate.fromJson(data, this) : null)
           as T;
     }
-    if (t == _i1.getType<_i9.Summary?>()) {
-      return (data != null ? _i9.Summary.fromJson(data, this) : null) as T;
-    }
-    if (t == _i1.getType<_i10.SummaryItem?>()) {
-      return (data != null ? _i10.SummaryItem.fromJson(data, this) : null) as T;
-    }
-    if (t == _i1.getType<_i11.UnsubscribeQueue?>()) {
-      return (data != null ? _i11.UnsubscribeQueue.fromJson(data, this) : null)
+    if (t == _i1.getType<_i9.SenderPriority?>()) {
+      return (data != null ? _i9.SenderPriority.fromJson(data, this) : null)
           as T;
     }
-    if (t == _i1.getType<_i12.User?>()) {
-      return (data != null ? _i12.User.fromJson(data, this) : null) as T;
+    if (t == _i1.getType<_i10.Summary?>()) {
+      return (data != null ? _i10.Summary.fromJson(data, this) : null) as T;
     }
-    if (t == _i1.getType<_i13.WebhookLog?>()) {
-      return (data != null ? _i13.WebhookLog.fromJson(data, this) : null) as T;
+    if (t == _i1.getType<_i11.SummaryItem?>()) {
+      return (data != null ? _i11.SummaryItem.fromJson(data, this) : null) as T;
     }
-    if (t == _i1.getType<_i14.WhitelistConfirmResult?>()) {
+    if (t == _i1.getType<_i12.UnsubscribeQueue?>()) {
+      return (data != null ? _i12.UnsubscribeQueue.fromJson(data, this) : null)
+          as T;
+    }
+    if (t == _i1.getType<_i13.User?>()) {
+      return (data != null ? _i13.User.fromJson(data, this) : null) as T;
+    }
+    if (t == _i1.getType<_i14.WebhookLog?>()) {
+      return (data != null ? _i14.WebhookLog.fromJson(data, this) : null) as T;
+    }
+    if (t == _i1.getType<_i15.WhitelistConfirmResult?>()) {
       return (data != null
-          ? _i14.WhitelistConfirmResult.fromJson(data, this)
+          ? _i15.WhitelistConfirmResult.fromJson(data, this)
           : null) as T;
     }
     if (t == _i1.getType<List<String>?>()) {
@@ -170,9 +180,14 @@ class Protocol extends _i1.SerializationManager {
       return (data as List).map((e) => deserialize<double>(e)).toList()
           as dynamic;
     }
-    if (t == List<_i15.SenderCandidate>) {
+    if (t == List<_i16.SenderPriority>) {
       return (data as List)
-          .map((e) => deserialize<_i15.SenderCandidate>(e))
+          .map((e) => deserialize<_i16.SenderPriority>(e))
+          .toList() as dynamic;
+    }
+    if (t == List<_i17.SenderCandidate>) {
+      return (data as List)
+          .map((e) => deserialize<_i17.SenderCandidate>(e))
           .toList() as dynamic;
     }
     if (t == _i1.getType<Map<String, dynamic>?>()) {
@@ -213,22 +228,25 @@ class Protocol extends _i1.SerializationManager {
     if (data is _i8.SenderCandidate) {
       return 'SenderCandidate';
     }
-    if (data is _i9.Summary) {
+    if (data is _i9.SenderPriority) {
+      return 'SenderPriority';
+    }
+    if (data is _i10.Summary) {
       return 'Summary';
     }
-    if (data is _i10.SummaryItem) {
+    if (data is _i11.SummaryItem) {
       return 'SummaryItem';
     }
-    if (data is _i11.UnsubscribeQueue) {
+    if (data is _i12.UnsubscribeQueue) {
       return 'UnsubscribeQueue';
     }
-    if (data is _i12.User) {
+    if (data is _i13.User) {
       return 'User';
     }
-    if (data is _i13.WebhookLog) {
+    if (data is _i14.WebhookLog) {
       return 'WebhookLog';
     }
-    if (data is _i14.WhitelistConfirmResult) {
+    if (data is _i15.WhitelistConfirmResult) {
       return 'WhitelistConfirmResult';
     }
     return super.getClassNameForObject(data);
@@ -257,23 +275,26 @@ class Protocol extends _i1.SerializationManager {
     if (data['className'] == 'SenderCandidate') {
       return deserialize<_i8.SenderCandidate>(data['data']);
     }
+    if (data['className'] == 'SenderPriority') {
+      return deserialize<_i9.SenderPriority>(data['data']);
+    }
     if (data['className'] == 'Summary') {
-      return deserialize<_i9.Summary>(data['data']);
+      return deserialize<_i10.Summary>(data['data']);
     }
     if (data['className'] == 'SummaryItem') {
-      return deserialize<_i10.SummaryItem>(data['data']);
+      return deserialize<_i11.SummaryItem>(data['data']);
     }
     if (data['className'] == 'UnsubscribeQueue') {
-      return deserialize<_i11.UnsubscribeQueue>(data['data']);
+      return deserialize<_i12.UnsubscribeQueue>(data['data']);
     }
     if (data['className'] == 'User') {
-      return deserialize<_i12.User>(data['data']);
+      return deserialize<_i13.User>(data['data']);
     }
     if (data['className'] == 'WebhookLog') {
-      return deserialize<_i13.WebhookLog>(data['data']);
+      return deserialize<_i14.WebhookLog>(data['data']);
     }
     if (data['className'] == 'WhitelistConfirmResult') {
-      return deserialize<_i14.WhitelistConfirmResult>(data['data']);
+      return deserialize<_i15.WhitelistConfirmResult>(data['data']);
     }
     return super.deserializeByClassName(data);
   }

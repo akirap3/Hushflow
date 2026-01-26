@@ -68,6 +68,46 @@ class GmailService {
       });
   }
   
+  /// Fetch full message details for a list of recent emails
+  Future<List<Map<String, dynamic>>> fetchMessages({int maxResults = 50}) async {
+    final msgIds = await _listMessages(maxResults: maxResults);
+    final messages = <Map<String, dynamic>>[];
+
+    for (final msgId in msgIds) {
+      final uri = Uri.parse(
+        'https://gmail.googleapis.com/gmail/v1/users/me/messages/$msgId'
+      );
+      
+      final response = await http.get(uri, headers: {
+        'Authorization': 'Bearer $accessToken',
+      });
+      
+      if (response.statusCode != 200) continue;
+      
+      final data = json.decode(response.body);
+      final payload = data['payload'] as Map<String, dynamic>?;
+      final headersList = payload?['headers'] as List<dynamic>? ?? [];
+      final snippet = data['snippet'] as String? ?? '';
+      
+      final headers = <String, String>{};
+      for (final header in headersList) {
+        final name = (header['name'] as String).toLowerCase();
+        final value = header['value'] as String;
+        headers[name] = value;
+      }
+
+      messages.add({
+        'id': msgId,
+        'threadId': data['threadId'],
+        'labelIds': data['labelIds'],
+        'snippet': snippet,
+        'headers': headers,
+      });
+    }
+
+    return messages;
+  }
+  
   /// List message IDs
   Future<List<String>> _listMessages({int maxResults = 200}) async {
     final uri = Uri.parse(

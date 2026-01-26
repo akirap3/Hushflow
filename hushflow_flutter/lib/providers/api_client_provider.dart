@@ -29,3 +29,7 @@ final summaryEndpointProvider = Provider<EndpointSummary>((ref) {
 final cleanupEndpointProvider = Provider<EndpointCleanup>((ref) {
   return ref.watch(apiClientProvider).cleanup;
 });
+
+final mlEndpointProvider = Provider<EndpointMl>((ref) {
+  return ref.watch(apiClientProvider).ml;
+});

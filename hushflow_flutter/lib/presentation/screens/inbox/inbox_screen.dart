@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:hushflow_client/hushflow_client.dart';
 import 'package:timeago/timeago.dart' as timeago;
+import '../../../providers/api_client_provider.dart';
+import '../../../providers/auth_provider.dart';
 
 class InboxScreen extends ConsumerStatefulWidget {
   const InboxScreen({super.key});
@@ -12,9 +15,71 @@ class InboxScreen extends ConsumerStatefulWidget {
 
 class _InboxScreenState extends ConsumerState<InboxScreen> {
   bool _showSubscriptionsOnly = false;
+  bool _isLoading = true;
+  List<SenderPriority> _senders = [];
+  String? _error;
   
   @override
+  void initState() {
+    super.initState();
+    _loadInbox();
+  }
+  
+  Future<void> _loadInbox() async {
+    setState(() {
+      _isLoading = true;
+      _error = null;
+    });
+
+    try {
+      final authState = ref.read(authStateProvider).valueOrNull;
+      final accessToken = authState?.accessToken;
+      
+      if (accessToken == null) {
+        setState(() {
+          _isLoading = false;
+          _error = 'Not authenticated';
+        });
+        return;
+      }
+
+      final mlEndpoint = ref.read(mlEndpointProvider);
+      // TODO: Get real userId
+      const userId = 1;
+      
+      final results = await mlEndpoint.analyzeInbox(
+        accessToken,
+        userId,
+        maxEmails: 50,
+      );
+      
+      if (mounted) {
+        setState(() {
+          _senders = results;
+          _isLoading = false;
+        });
+      }
+    } catch (e) {
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+          _error = 'Failed to load inbox: $e';
+        });
+      }
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
+    // Filter senders based on toggle
+    final filteredSenders = _senders.where((s) {
+      if (_showSubscriptionsOnly && !s.latestSnippet.toLowerCase().contains('unsubscribe')) {
+          // Simple check as isWhitelisted/isSubscription might not be fully populated yet
+          return false;
+      }
+      return true;
+    }).toList();
+
     return Scaffold(
       appBar: AppBar(
         title: const Text('Inbox'),
@@ -23,79 +88,63 @@ class _InboxScreenState extends ConsumerState<InboxScreen> {
             icon: Icon(_showSubscriptionsOnly ? Icons.mark_email_read : Icons.mail),
             onPressed: () => setState(() => _showSubscriptionsOnly = !_showSubscriptionsOnly),
           ),
-          IconButton(icon: const Icon(Icons.search), onPressed: () {}),
+          IconButton(
+            icon: const Icon(Icons.refresh), 
+            onPressed: _loadInbox,
+          ),
         ],
       ),
-      body: RefreshIndicator(
-        onRefresh: () async {},
+      body: _isLoading 
+        ? const Center(child: CircularProgressIndicator())
+        : _error != null
+          ? Center(child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 32),
+                  child: Text(_error!, textAlign: TextAlign.center),
+                ),
+                const SizedBox(height: 16),
+                FilledButton(onPressed: _loadInbox, child: const Text('Retry')),
+                const SizedBox(height: 8),
+                TextButton(
+                  onPressed: () {
+                    ref.read(authStateProvider.notifier).signOut();
+                  },
+                  child: const Text('Sign Out'),
+                ),
+              ],
+            ))
+          : RefreshIndicator(
+        onRefresh: _loadInbox,
         child: CustomScrollView(
           slivers: [
-            SliverToBoxAdapter(child: _PriorityBanner(highPriorityCount: 5, onTap: () {})),
-            SliverList.builder(
-              itemCount: 10,
-              itemBuilder: (context, index) {
-                return _EmailTile(
-                  sender: 'Sender $index',
-                  subject: 'Email subject line $index',
-                  snippet: 'This is a preview of the email content...',
-                  receivedAt: DateTime.now().subtract(Duration(hours: index * 2)),
-                  isRead: index % 3 == 0,
-                  isSubscription: index % 2 == 0,
-                  priorityScore: 1.0 - (index * 0.1),
-                  onTap: () => context.push('/email/$index'),
-                  onExclude: () {},
-                );
-              },
-            ),
+            if (filteredSenders.isEmpty)
+              const SliverFillRemaining(
+                child: Center(child: Text('No emails found')),
+              )
+            else
+              SliverList.builder(
+                itemCount: filteredSenders.length,
+                itemBuilder: (context, index) {
+                  final sender = filteredSenders[index];
+                  final score = sender.maxScore;
+                  final isHighPriority = score >= 0.7;
+                  
+                  return _EmailTile(
+                    sender: sender.name,
+                    subject: sender.email, // Show email as "subject" context for now or snippet
+                    snippet: sender.latestSnippet,
+                    receivedAt: sender.latestReceivedAt,
+                    isRead: true, // Not tracking read state per sender yet
+                    isSubscription: false,
+                    priorityScore: score,
+                    onTap: () {}, // TODO: Detail view
+                    onExclude: () {},
+                  );
+                },
+              ),
           ],
-        ),
-      ),
-    );
-  }
-}
-
-class _PriorityBanner extends StatelessWidget {
-  final int highPriorityCount;
-  final VoidCallback onTap;
-
-  const _PriorityBanner({required this.highPriorityCount, required this.onTap});
-
-  @override
-  Widget build(BuildContext context) {
-    if (highPriorityCount == 0) return const SizedBox.shrink();
-    return Padding(
-      padding: const EdgeInsets.all(16),
-      child: InkWell(
-        onTap: onTap,
-        borderRadius: BorderRadius.circular(16),
-        child: Container(
-          padding: const EdgeInsets.all(16),
-          decoration: BoxDecoration(
-            gradient: LinearGradient(colors: [
-              Theme.of(context).colorScheme.primaryContainer,
-              Theme.of(context).colorScheme.secondaryContainer,
-            ]),
-            borderRadius: BorderRadius.circular(16),
-          ),
-          child: Row(
-            children: [
-              CircleAvatar(
-                backgroundColor: Theme.of(context).colorScheme.primary,
-                child: Text('$highPriorityCount', style: const TextStyle(color: Colors.white)),
-              ),
-              const SizedBox(width: 16),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text('High Priority', style: Theme.of(context).textTheme.titleMedium),
-                    Text('Important emails based on your activity', style: Theme.of(context).textTheme.bodySmall),
-                  ],
-                ),
-              ),
-              const Icon(Icons.chevron_right),
-            ],
-          ),
         ),
       ),
     );
@@ -117,42 +166,42 @@ class _EmailTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Dismissible(
-      key: Key(sender + subject),
-      direction: DismissDirection.endToStart,
-      background: Container(
-        color: Theme.of(context).colorScheme.errorContainer,
-        alignment: Alignment.centerRight,
-        padding: const EdgeInsets.only(right: 16),
-        child: const Icon(Icons.visibility_off),
+    return ListTile(
+      onTap: onTap,
+      leading: CircleAvatar(
+        backgroundColor: priorityScore >= 0.7 ? Colors.green.withOpacity(0.2) : null,
+        child: Text(sender.isNotEmpty ? sender[0].toUpperCase() : '?'),
       ),
-      confirmDismiss: (_) async { onExclude(); return false; },
-      child: ListTile(
-        onTap: onTap,
-        leading: CircleAvatar(child: Text(sender.isNotEmpty ? sender[0] : '?')),
-        title: Row(
-          children: [
-            Expanded(child: Text(sender, style: TextStyle(fontWeight: isRead ? FontWeight.normal : FontWeight.bold))),
-            Text(timeago.format(receivedAt), style: Theme.of(context).textTheme.bodySmall),
-          ],
-        ),
-        subtitle: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(subject, maxLines: 1, overflow: TextOverflow.ellipsis),
-            Text(snippet, maxLines: 1, style: Theme.of(context).textTheme.bodySmall),
-            Row(
-              children: [
-                if (isSubscription) Chip(label: const Text('Newsletter'), padding: EdgeInsets.zero, visualDensity: VisualDensity.compact),
-                const SizedBox(width: 8),
-                Icon(Icons.trending_up, size: 12, color: priorityScore > 0.7 ? Colors.green : Colors.grey),
-                Text('${(priorityScore * 100).toInt()}%', style: Theme.of(context).textTheme.labelSmall),
-              ],
-            ),
-          ],
-        ),
-        isThreeLine: true,
+      title: Row(
+        children: [
+          Expanded(child: Text(sender, style: const TextStyle(fontWeight: FontWeight.bold))),
+          Text(timeago.format(receivedAt), style: Theme.of(context).textTheme.bodySmall),
+        ],
       ),
+      subtitle: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(snippet, maxLines: 1, overflow: TextOverflow.ellipsis),
+          Row(
+            children: [
+              Icon(Icons.auto_graph, size: 12, color: priorityScore > 0.7 ? Colors.green : Colors.grey),
+              const SizedBox(width: 4),
+              Text('${(priorityScore * 100).toInt()}%', style: Theme.of(context).textTheme.labelSmall),
+              const SizedBox(width: 8),
+              if (priorityScore > 0.7)
+                 Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                    decoration: BoxDecoration(
+                        color: Colors.green.withOpacity(0.1),
+                        borderRadius: BorderRadius.circular(4)
+                    ),
+                    child: Text('High Priority', style: TextStyle(fontSize: 10, color: Colors.green)),
+                 )
+            ],
+          ),
+        ],
+      ),
+      isThreeLine: true,
     );
   }
 }

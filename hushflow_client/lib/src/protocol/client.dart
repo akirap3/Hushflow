@@ -10,10 +10,11 @@
 // ignore_for_file: no_leading_underscores_for_library_prefixes
 import 'package:serverpod_client/serverpod_client.dart' as _i1;
 import 'dart:async' as _i2;
-import 'package:hushflow_client/src/protocol/sender_candidate.dart' as _i3;
+import 'package:hushflow_client/src/protocol/sender_priority.dart' as _i3;
+import 'package:hushflow_client/src/protocol/sender_candidate.dart' as _i4;
 import 'package:hushflow_client/src/protocol/whitelist_confirm_result.dart'
-    as _i4;
-import 'protocol.dart' as _i5;
+    as _i5;
+import 'protocol.dart' as _i6;
 
 /// Auth Endpoint
 /// Handles Gmail OAuth flow and user session management
@@ -318,6 +319,22 @@ class EndpointMl extends _i1.EndpointRef {
           'emailsData': emailsData,
         },
       );
+
+  /// Analyze inbox and group by sender with priority scores
+  _i2.Future<List<_i3.SenderPriority>> analyzeInbox(
+    String accessToken,
+    int userId, {
+    required int maxEmails,
+  }) =>
+      caller.callServerEndpoint<List<_i3.SenderPriority>>(
+        'ml',
+        'analyzeInbox',
+        {
+          'accessToken': accessToken,
+          'userId': userId,
+          'maxEmails': maxEmails,
+        },
+      );
 }
 
 /// Onboarding Endpoint
@@ -331,11 +348,11 @@ class EndpointOnboarding extends _i1.EndpointRef {
 
   /// Scan Gmail for subscription/newsletter senders
   /// Called on first login to build whitelist candidates
-  _i2.Future<List<_i3.SenderCandidate>> scanForSubscriptions(
+  _i2.Future<List<_i4.SenderCandidate>> scanForSubscriptions(
     String accessToken, {
     required int maxEmails,
   }) =>
-      caller.callServerEndpoint<List<_i3.SenderCandidate>>(
+      caller.callServerEndpoint<List<_i4.SenderCandidate>>(
         'onboarding',
         'scanForSubscriptions',
         {
@@ -346,11 +363,11 @@ class EndpointOnboarding extends _i1.EndpointRef {
 
   /// Confirm whitelist selections from user
   /// Creates Sender records with isWhitelisted = true for confirmed senders
-  _i2.Future<_i4.WhitelistConfirmResult> confirmWhitelist(
+  _i2.Future<_i5.WhitelistConfirmResult> confirmWhitelist(
     int userId,
-    List<_i3.SenderCandidate> confirmedSenders,
+    List<_i4.SenderCandidate> confirmedSenders,
   ) =>
-      caller.callServerEndpoint<_i4.WhitelistConfirmResult>(
+      caller.callServerEndpoint<_i5.WhitelistConfirmResult>(
         'onboarding',
         'confirmWhitelist',
         {
@@ -546,7 +563,7 @@ class Client extends _i1.ServerpodClient {
     Duration? connectionTimeout,
   }) : super(
           host,
-          _i5.Protocol(),
+          _i6.Protocol(),
           securityContext: securityContext,
           authenticationKeyManager: authenticationKeyManager,
           streamingConnectionTimeout: streamingConnectionTimeout,

@@ -598,6 +598,36 @@ class Endpoints extends _i1.EndpointDispatch {
             params['emailsData'],
           ),
         ),
+        'analyzeInbox': _i1.MethodConnector(
+          name: 'analyzeInbox',
+          params: {
+            'accessToken': _i1.ParameterDescription(
+              name: 'accessToken',
+              type: _i1.getType<String>(),
+              nullable: false,
+            ),
+            'userId': _i1.ParameterDescription(
+              name: 'userId',
+              type: _i1.getType<int>(),
+              nullable: false,
+            ),
+            'maxEmails': _i1.ParameterDescription(
+              name: 'maxEmails',
+              type: _i1.getType<int>(),
+              nullable: false,
+            ),
+          },
+          call: (
+            _i1.Session session,
+            Map<String, dynamic> params,
+          ) async =>
+              (endpoints['ml'] as _i6.MlEndpoint).analyzeInbox(
+            session,
+            params['accessToken'],
+            params['userId'],
+            maxEmails: params['maxEmails'],
+          ),
+        ),
       },
     );
     connectors['onboarding'] = _i1.EndpointConnector(

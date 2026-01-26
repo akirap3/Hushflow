@@ -23,6 +23,7 @@ example:
 ml:
   - predictPriority:
   - predictBatch:
+  - analyzeInbox:
 onboarding:
   - scanForSubscriptions:
   - confirmWhitelist:
