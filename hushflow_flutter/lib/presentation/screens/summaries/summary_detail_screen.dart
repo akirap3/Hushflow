@@ -152,18 +152,61 @@ class _SummaryDetailScreenState extends ConsumerState<SummaryDetailScreen> {
             ),
           ),
 
-          // Staggered Grid of Email Items
+          // Staggered Grid of Email Items with Hero cards taking full width
           SliverPadding(
             padding: const EdgeInsets.symmetric(horizontal: 16),
-            sliver: SliverMasonryGrid.count(
-              crossAxisCount: 2,
-              mainAxisSpacing: 12,
-              crossAxisSpacing: 12,
-              childCount: sortedItems.length,
-              itemBuilder: (context, index) {
-                final item = sortedItems[index];
-                return _buildItemCard(context, item, index);
-              },
+            sliver: SliverList(
+              delegate: SliverChildBuilderDelegate(
+                (context, index) {
+                  final item = sortedItems[index];
+                  final priority = item.priorityScore;
+                  
+                  // Hero cards (high priority) take full width
+                  if (priority >= 0.7 && index < 3) {
+                    return Padding(
+                      padding: const EdgeInsets.only(bottom: 12),
+                      child: _HeroCard(item: item),
+                    );
+                  }
+                  
+                  // For medium/low priority, use 2-column grid
+                  // Group items in pairs
+                  final remainingItems = sortedItems.skip(3).toList();
+                  if (index == 3) {
+                    // Start the grid section
+                    return Column(
+                      children: [
+                        for (int i = 0; i < remainingItems.length; i += 2)
+                          Padding(
+                            padding: const EdgeInsets.only(bottom: 12),
+                            child: Row(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Expanded(
+                                  child: remainingItems[i].priorityScore >= 0.5
+                                      ? _MediumCard(item: remainingItems[i])
+                                      : _CompactCard(item: remainingItems[i]),
+                                ),
+                                if (i + 1 < remainingItems.length) ...[
+                                  const SizedBox(width: 12),
+                                  Expanded(
+                                    child: remainingItems[i + 1].priorityScore >= 0.5
+                                        ? _MediumCard(item: remainingItems[i + 1])
+                                        : _CompactCard(item: remainingItems[i + 1]),
+                                  ),
+                                ],
+                              ],
+                            ),
+                          ),
+                      ],
+                    );
+                  }
+                  
+                  // Skip other indices since we handle them in the grid
+                  return const SizedBox.shrink();
+                },
+                childCount: sortedItems.isEmpty ? 0 : (sortedItems.length > 3 ? 4 : sortedItems.length),
+              ),
             ),
           ),
 
@@ -238,7 +281,7 @@ class _HeroCard extends StatelessWidget {
               )
             else
               Container(
-                height: 120,
+                height: 180,  // Increased from 120 to make it more prominent
                 decoration: BoxDecoration(
                   gradient: LinearGradient(
                     begin: Alignment.topLeft,
@@ -249,8 +292,17 @@ class _HeroCard extends StatelessWidget {
                     ],
                   ),
                 ),
-                child: Center(
-                  child: Icon(Icons.priority_high, size: 48, color: Colors.white.withOpacity(0.5)),
+                child: Stack(
+                  children: [
+                    Center(
+                      child: Icon(Icons.priority_high, size: 64, color: Colors.white.withOpacity(0.3)),
+                    ),
+                    Positioned(
+                      top: 16,
+                      right: 16,
+                      child: _PriorityBadge(score: priorityPercent, isHero: true),
+                    ),
+                  ],
                 ),
               ),
             
@@ -289,11 +341,11 @@ class _HeroCard extends StatelessWidget {
                   // Subject (larger for hero card)
                   Text(
                     item.subject,
-                    style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                    style: Theme.of(context).textTheme.headlineSmall?.copyWith(
                       fontWeight: FontWeight.bold,
                       height: 1.2,
                     ),
-                    maxLines: 3,
+                    maxLines: 2,
                     overflow: TextOverflow.ellipsis,
                   ),
                   const SizedBox(height: 8),
@@ -301,8 +353,8 @@ class _HeroCard extends StatelessWidget {
                   // Summary
                   Text(
                     item.summaryText,
-                    style: Theme.of(context).textTheme.bodyMedium,
-                    maxLines: 3,
+                    style: Theme.of(context).textTheme.bodyLarge,
+                    maxLines: 4,
                     overflow: TextOverflow.ellipsis,
                   ),
                 ],
@@ -441,7 +493,7 @@ class _CompactCard extends StatelessWidget {
           );
         },
         child: Padding(
-          padding: const EdgeInsets.all(12),
+          padding: const EdgeInsets.all(8),  // Reduced from 12
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -449,20 +501,21 @@ class _CompactCard extends StatelessWidget {
               Row(
                 children: [
                   CircleAvatar(
-                    radius: 8,
+                    radius: 6,  // Reduced from 8
                     backgroundColor: Theme.of(context).colorScheme.tertiaryContainer,
                     child: Text(
                       item.sender.isNotEmpty ? item.sender[0].toUpperCase() : '?',
-                      style: TextStyle(fontSize: 9, color: Theme.of(context).colorScheme.onTertiaryContainer),
+                      style: TextStyle(fontSize: 8, color: Theme.of(context).colorScheme.onTertiaryContainer),
                     ),
                   ),
-                  const SizedBox(width: 6),
+                  const SizedBox(width: 4),
                   Expanded(
                     child: Text(
                       item.sender,
                       style: Theme.of(context).textTheme.labelSmall?.copyWith(
                         color: Theme.of(context).colorScheme.tertiary,
                         fontWeight: FontWeight.w600,
+                        fontSize: 11,
                       ),
                       overflow: TextOverflow.ellipsis,
                     ),
@@ -470,7 +523,7 @@ class _CompactCard extends StatelessWidget {
                   _PriorityBadge(score: priorityPercent, compact: true),
                 ],
               ),
-              const SizedBox(height: 8),
+              const SizedBox(height: 6),  // Reduced from 8
               
               // Subject
               Text(
@@ -478,19 +531,21 @@ class _CompactCard extends StatelessWidget {
                 style: Theme.of(context).textTheme.titleSmall?.copyWith(
                   fontWeight: FontWeight.bold,
                   height: 1.2,
+                  fontSize: 13,
                 ),
                 maxLines: 2,
                 overflow: TextOverflow.ellipsis,
               ),
-              const SizedBox(height: 4),
+              const SizedBox(height: 2),  // Reduced from 4
               
               // Summary (minimal)
               Text(
                 item.summaryText,
                 style: Theme.of(context).textTheme.bodySmall?.copyWith(
                   color: Theme.of(context).colorScheme.onSurface.withOpacity(0.6),
+                  fontSize: 11,
                 ),
-                maxLines: 2,
+                maxLines: 1,  // Reduced from 2
                 overflow: TextOverflow.ellipsis,
               ),
             ],

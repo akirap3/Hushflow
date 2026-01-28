@@ -31,50 +31,139 @@ class SummaryEndpoint extends Endpoint {
   }
 
   /// Get single summary with items populated from real Gmail data
-  /// This simulates a "Weekly Digest" by fetching the user's recent emails
+  /// This fetches recent emails and uses ML predictions for priority scores
   Future<SummaryDetails?> getSummaryDetails(Session session, String accessToken, int summaryId) async {
     session.log('Getting summary details for $summaryId');
     
     final gmail = GmailService(accessToken);
     
     // Fetch recent emails to populate the summary
-    final messages = await gmail.fetchMessages(maxResults: 20);
+    final messages = await gmail.fetchMessages(maxResults: 50);
     
-    // Convert to SummaryItems
-    final items = <SummaryItem>[];
-    for (var i = 0; i < messages.length; i++) {
-        final msg = messages[i];
-        final headers = msg['headers'] as Map<String, String>;
-        final subject = headers['subject'] ?? '(no subject)';
-        final from = headers['from'] ?? 'unknown';
-        final snippet = msg['snippet'] as String;
-        
-        // Mock scoring (or use ML service if needed, but simple hash for consistency here)
-        final priorityScore = 0.5 + (subject.length % 5) / 10.0;
-        
-        items.add(SummaryItem(
-            summaryId: summaryId,
-            emailId: 0, // Placeholder
-            sender: from.contains('<') ? from.split('<')[0].trim().replaceAll('"', '') : from,
-            subject: subject,
-            summaryText: snippet, // Use snippet as summary for now
-            priorityScore: priorityScore,
-            order: i,
-        ));
-    }
-    
-    // Create the parent summary object
-    final summary = Summary(
+    if (messages.isEmpty) {
+      // Return empty summary if no emails
+      final summary = Summary(
         userId: 0, 
         title: 'Weekly Email Digest',
-        content: 'Here is your summary for the week.',
-        emailCount: items.length,
+        content: 'No emails found for this period.',
+        emailCount: 0,
         generatedAt: DateTime.now(),
         periodStart: DateTime.now().subtract(const Duration(days: 7)),
         periodEnd: DateTime.now(),
         isRead: true,
+      );
+      return SummaryDetails(summary: summary, items: []);
+    }
+    
+    // Prepare data for ML batch prediction
+    final emailsData = <Map<String, dynamic>>[];
+    final rawMessages = <Map<String, dynamic>>[];
+    
+    for (final msg in messages) {
+      final headers = msg['headers'] as Map<String, String>;
+      final subject = headers['subject'] ?? '(no subject)';
+      final from = headers['from'] ?? 'unknown';
+      final snippet = msg['snippet'] as String;
+      final body = snippet; // Use snippet as body for now
+      
+      final dateStr = headers['date'];
+      DateTime receivedAt;
+      try {
+        receivedAt = dateStr != null 
+          ? DateTime.tryParse(dateStr) ?? DateTime.now()
+          : DateTime.now();
+      } catch (e) {
+        receivedAt = DateTime.now();
+      }
+      
+      final hasUnsubscribe = headers.containsKey('list-unsubscribe');
+      final linkCount = RegExp(r'https?://').allMatches(snippet).length;
+      
+      emailsData.add({
+        'subject': subject,
+        'body': body,
+        'receivedAt': receivedAt.toIso8601String(),
+        'hasUnsubscribe': hasUnsubscribe,
+        'linkCount': linkCount,
+        'imageCount': 0,
+      });
+      
+      rawMessages.add({
+        'headers': headers,
+        'snippet': snippet,
+        'receivedAt': receivedAt,
+      });
+    }
+    
+    // Get ML predictions for all emails
+    final mlService = MlService();
+    List<double> scores;
+    try {
+      final featuresList = emailsData.map((email) {
+        final receivedAtStr = email['receivedAt'];
+        DateTime receivedAt;
+        if (receivedAtStr is DateTime) {
+          receivedAt = receivedAtStr;
+        } else if (receivedAtStr is String) {
+          receivedAt = DateTime.tryParse(receivedAtStr) ?? DateTime.now();
+        } else {
+          receivedAt = DateTime.now();
+        }
+        
+        return MlService.extractFeatures(
+          subject: email['subject'] as String? ?? '',
+          body: email['body'] as String? ?? '',
+          receivedAt: receivedAt,
+          hasUnsubscribe: email['hasUnsubscribe'] as bool? ?? false,
+          linkCount: email['linkCount'] as int? ?? 0,
+          imageCount: email['imageCount'] as int? ?? 0,
+        );
+      }).toList();
+      
+      scores = await mlService.predictBatch(
+        userId: 1, // TODO: Use real userId
+        featuresList: featuresList,
+      );
+      session.log('ML predictions complete: ${scores.length} scores');
+    } catch (e) {
+      session.log('ML prediction failed: $e, using default scores');
+      scores = List.filled(emailsData.length, 0.5);
+    }
+    
+    // Convert to SummaryItems with real ML scores
+    final items = <SummaryItem>[];
+    for (var i = 0; i < rawMessages.length; i++) {
+      final msg = rawMessages[i];
+      final headers = msg['headers'] as Map<String, String>;
+      final subject = headers['subject'] ?? '(no subject)';
+      final from = headers['from'] ?? 'unknown';
+      final snippet = msg['snippet'] as String;
+      final priorityScore = scores[i];
+      
+      items.add(SummaryItem(
+        summaryId: summaryId,
+        emailId: 0, // Placeholder
+        sender: from.contains('<') ? from.split('<')[0].trim().replaceAll('"', '') : from,
+        subject: subject,
+        summaryText: snippet.length > 150 ? '${snippet.substring(0, 150)}...' : snippet,
+        priorityScore: priorityScore,
+        order: i,
+      ));
+    }
+    
+    // Create the parent summary object
+    final summary = Summary(
+      userId: 0, 
+      title: 'Weekly Email Digest',
+      content: 'AI-curated summary of your ${items.length} most important subscription emails.',
+      emailCount: items.length,
+      generatedAt: DateTime.now(),
+      periodStart: DateTime.now().subtract(const Duration(days: 7)),
+      periodEnd: DateTime.now(),
+      isRead: false,
     );
 
+    session.log('Generated summary with ${items.length} items');
     return SummaryDetails(summary: summary, items: items);
   }
 }
