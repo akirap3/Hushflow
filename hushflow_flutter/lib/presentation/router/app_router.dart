@@ -11,6 +11,7 @@ import '../screens/summaries/summary_detail_screen.dart';
 import '../screens/cleanup/cleanup_screen.dart';
 import '../screens/settings/settings_screen.dart';
 import '../screens/voice/audio_briefing_screen.dart';
+import '../screens/onboarding/onboarding_whitelist_screen.dart';
 import '../../providers/auth_provider.dart';
 
 final routerProvider = Provider<GoRouter>((ref) {
@@ -21,6 +22,7 @@ final routerProvider = Provider<GoRouter>((ref) {
     redirect: (context, state) {
       final isLoggedIn = authState.valueOrNull?.isAuthenticated ?? false;
       final isLoginRoute = state.matchedLocation == '/login';
+      final isOnboardingRoute = state.matchedLocation.startsWith('/onboarding');
       
       if (!isLoggedIn && !isLoginRoute) {
         return '/login';
@@ -35,6 +37,12 @@ final routerProvider = Provider<GoRouter>((ref) {
       GoRoute(
         path: '/login',
         builder: (context, state) => const LoginScreen(),
+      ),
+      
+      // Onboarding routes
+      GoRoute(
+        path: '/onboarding/whitelist',
+        builder: (context, state) => const OnboardingWhitelistScreen(),
       ),
       
       // Main shell route with bottom navigation

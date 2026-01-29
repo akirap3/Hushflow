@@ -1,0 +1,4 @@
+class: SummaryDetails
+fields:
+  summary: Summary
+  items: List<SummaryItem>

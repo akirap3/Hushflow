@@ -1,0 +1,9 @@
+class: SenderPriority
+fields:
+  email: String
+  name: String
+  maxScore: double
+  latestSnippet: String
+  latestReceivedAt: DateTime
+  emailCount: int
+  isWhitelisted: bool

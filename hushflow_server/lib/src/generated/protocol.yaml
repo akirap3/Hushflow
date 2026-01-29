@@ -20,14 +20,19 @@ email:
   - triggerColdStart:
 example:
   - hello:
+ml:
+  - predictPriority:
+  - predictBatch:
+  - analyzeInbox:
+onboarding:
+  - scanForSubscriptions:
+  - confirmWhitelist:
+  - getWhitelist:
+  - addToWhitelist:
+  - removeFromWhitelist:
 summary:
   - listSummaries:
-  - getSummary:
-  - generateSummary:
-  - markAsRead:
-  - getAudioUrl:
-  - setSchedule:
-  - getSchedule:
+  - getSummaryDetails:
 voice:
   - parseIntent:
   - generateBriefing:
