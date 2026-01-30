@@ -1,5 +1,4 @@
 import 'package:serverpod/serverpod.dart';
-import 'dart:io';
 import '../services/ml_service.dart';
 import '../services/gmail_service.dart';
 import '../generated/sender_priority.dart';
@@ -7,9 +6,7 @@ import '../generated/sender_priority.dart';
 /// ML Endpoint
 /// Provides email priority predictions using the Python ML service
 class MlEndpoint extends Endpoint {
-  final _mlService = MlService(
-    baseUrl: Platform.environment['ML_SERVICE_URL'] ?? 'http://localhost:8000',
-  );
+  final _mlService = MlService();
   
   /// Get priority score for a single email
   Future<double> predictPriority(

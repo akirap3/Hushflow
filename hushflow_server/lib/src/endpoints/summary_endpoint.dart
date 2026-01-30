@@ -1,5 +1,4 @@
 import 'package:serverpod/serverpod.dart';
-import 'dart:io';
 import '../generated/protocol.dart';
 import '../services/gmail_service.dart';
 import '../services/ml_service.dart';
@@ -97,9 +96,7 @@ class SummaryEndpoint extends Endpoint {
     }
     
     // Get ML predictions for all emails
-    final mlService = MlService(
-      baseUrl: Platform.environment['ML_SERVICE_URL'] ?? 'http://localhost:8000',
-    );
+    final mlService = MlService();
     List<double> scores;
     try {
       final featuresList = emailsData.map((email) {
