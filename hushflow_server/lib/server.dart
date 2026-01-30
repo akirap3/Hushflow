@@ -18,7 +18,6 @@ void run(List<String> args) async {
     Endpoints(),
   );
 
-
   // If you are using any future calls, they need to be registered here.
   // pod.registerFutureCall(ExampleFutureCall(), 'exampleFutureCall');
 

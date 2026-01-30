@@ -12,15 +12,15 @@ RUN dart compile exe bin/main.dart -o bin/main
 # compatible with the dart image.
 FROM busybox:1.36.1-glibc
 
-ENV runmode=production
+ENV runmode=development
 ENV serverid=default
 ENV logging=normal
 ENV role=monolith
 
+COPY --from=build /runtime/ /
 COPY --from=build /app/bin/main /app/bin/main
 COPY --from=build /app/config/ config/
 COPY --from=build /app/web/ web/
-COPY --from=build /app/config/passwords_production.yaml config/passwords.yaml
 
 EXPOSE 8080
 EXPOSE 8081
